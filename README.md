@@ -8,7 +8,7 @@ A data science notebook demonstrating one of the most important — and most com
 
 A gradient boosting model trained on 32,000 US workers assigns education a **feature importance of 74.6%** — by far the #1 predictor of wages.
 
-Does that mean sending people to college raises their wages by 74%?
+Does that mean sending people to college raises their wages by 75%?
 
 **No. This notebook shows exactly why — and what to do instead.**
 
@@ -26,10 +26,10 @@ Does that mean sending people to college raises their wages by 74%?
 
 ## The Data
 
-**Current Population Survey (CPS) ASEC 2023** via [IPUMS CPS](https://cps.ipums.org)  
+**Current Population Survey (CPS) ASEC 2024** via [IPUMS CPS](https://cps.ipums.org)  
 32,613 prime-age (25–55) wage and salary workers in the United States.
 
-To replicate: register at [ipums.org](https://ipums.org), select CPS ASEC 2023, and request the variables listed in the notebook header.
+To replicate: register at [ipums.org](https://ipums.org), select CPS ASEC 2024, and request the variables listed in the notebook header.
 
 ---
 
@@ -43,21 +43,20 @@ Key observations:
 - Log wages are roughly normally distributed, justifying the log transformation
 - There is a clear, monotonic education gradient — more education, higher wages
 - The classic Mincer curve: wages rise steeply with experience, then flatten after ~25 years
-- Significant gender and race gaps persist across all groups
+- Gender and race gaps persist across all groups
 
 ---
 
-## Section 2: The ML Model — Good at Predicting, Dangerous for Policy
-
+## Section 2: The ML Model — Good for prediction, not good for informing policy
 We train a gradient boosting model to predict log wages using education, experience, gender, race, and marital status.
 
 ![Section 2 ML Model](figures/section2_ml_model.png)
 
 **Results:**
-- R² = 0.30 — reasonable predictive accuracy for wage data with 7 features
-- Education dominates feature importances at **74.6%** — far above every other variable
+- R² = 0.30 which is a reasonable predictive accuracy for wage data with 7 features
+- Education dominates feature importances at **74.6%**
 
-The natural conclusion: education is the most powerful lever for raising wages. This is the trap. The next two sections show why this conclusion is wrong.
+ML conclusion: education is the most powerful lever for raising wages. Though there is some truth in that, we cannot make a causal connection just yet.
 
 ---
 
@@ -75,7 +74,7 @@ We run OLS regressions with progressively more controls to test whether the educ
 | Add experience & experience² | 12.6% per year | Partial control |
 | Full observable controls | 12.4% per year | Best we can do with OLS |
 
-**This stability is not reassuring — it is deceptive.** It means the key confounders (innate ability, family wealth, school quality, social networks) are simply not in our dataset. No matter how many observable variables we add, the unobservable bias remains. We need a different strategy.
+**This stability is deceptive.** It means the key confounders (innate ability, family wealth, school quality, social networks) are simply not in our dataset. No matter how many observable variables we add, the unobservable bias remains. We need very strong assumptions if we are to make a causal connection of education with income.
 
 ---
 
@@ -93,9 +92,9 @@ We apply propensity score matching to compare Bachelor's degree holders against 
 | Matched ATT | 55.1% |
 | Bias removed | ~0 percentage points |
 
-Matching barely moves the estimate, and balance barely improves. This is not a failure of the method — it is the finding. Selection into college is driven by the very unobservables (ability, family background) that propensity score matching cannot touch.
+Matching barely moves the estimate, and balance barely improves. Selection into college is driven by the very unobservables (ability, family background) that propensity score matching cannot touch.
 
-**The honest conclusion:** we cannot credibly estimate the causal return to education with this data and this method. Economists solve this using instruments — compulsory schooling laws, proximity to college — that create exogenous variation in education independent of ability.
+**The honest conclusion:** we cannot credibly estimate the causal return to education with this data and this method. In order to do a rigoruous analysis, we need to rely on IVs that create exogenous variation in education independent of ability. Examples include compulsory schooling laws, proximity to college etc. 
 
 ---
 
@@ -113,7 +112,7 @@ Matching barely moves the estimate, and balance barely improves. This is not a f
 | Propensity score matching | 55.1% BA premium | ATT among comparable workers | Balance fails on unobservables |
 | IV / RDD (from literature) | ~7–10% per year | True causal return | Requires exogenous variation |
 
-The raw Bachelor's wage premium is real — people with degrees do earn more. But it reflects *who goes to college*, not just *what college does to them*. The literature's best causal estimates put the true return at 7–10% per year (Card 1995; Angrist & Krueger 1991) — meaningfully lower than the 55% raw premium.
+The raw Bachelor's wage premium is real — people with degrees do earn more. We must be wary about the selection bias which is actually telling us *who goes to college*, instead of *what college does to them*. The literature's best causal estimates put the true return at 7–10% per year (Card 1995; Angrist & Krueger 1991) — meaningfully lower than the 55% raw premium.
 
 ### When to use which method
 
